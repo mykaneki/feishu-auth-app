@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>飞书多维表格授权</title>
+    <title>飞书多维表格单词本</title>
     <style>
-        /* 样式与之前版本相同，保持不变 */
         :root {
             --primary-color: #CC785C;
             --background-color: #FDFCFB;
@@ -16,20 +15,18 @@
             --error-color: #D9534F;
             --success-color: #5CB85C;
         }
-
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background-color: var(--background-color);
             color: var(--text-color);
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* 改为 flex-start 以容纳更多内容 */
             min-height: 100vh;
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
         }
-
         .container {
             width: 100%;
             max-width: 500px;
@@ -40,116 +37,50 @@
             border: 1px solid var(--border-color);
             transition: all 0.3s ease;
         }
-
-        h1 {
-            text-align: center;
-            font-size: 24px;
-            margin-bottom: 24px;
-            color: var(--primary-color);
+        h1 { text-align: center; font-size: 24px; margin-bottom: 24px; color: var(--primary-color); }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; }
+        input[type="text"], input[type="password"], select {
+            width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; box-sizing: border-box; transition: border-color 0.3s ease;
         }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        input[type="text"],
-        input[type="password"] {
-            width: 100%;
-            padding: 12px;
+        input:focus, select:focus { outline: none; border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.2); }
+        .button-group { display: flex; gap: 12px; margin-top: 20px; }
+        .button { flex-grow: 1; padding: 12px 20px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; text-align: center; }
+        .button-primary { background-color: var(--primary-color); color: var(--button-text-color); }
+        .button-primary:hover { opacity: 0.9; transform: translateY(-2px); }
+        .button-secondary { background-color: #f0f0f0; color: #555; }
+        .button-secondary:hover { background-color: #e0e0e0; }
+        .message-box { text-align: center; padding: 20px; border-radius: 8px; margin-top: 20px; }
+        .message-box.error { background-color: rgba(217, 83, 79, 0.1); color: var(--error-color); border: 1px solid rgba(217, 83, 79, 0.2); }
+        .message-box.success { background-color: rgba(92, 184, 92, 0.1); color: var(--success-color); border: 1px solid rgba(92, 184, 92, 0.2); }
+        .hidden { display: none; }
+        .security-note { font-size: 12px; color: #999; text-align: center; margin-top: 24px; }
+        
+        /* 新增卡片样式 */
+        .word-card {
+            background-color: #fff;
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-size: 16px;
-            box-sizing: border-box;
-            transition: border-color 0.3s ease;
-        }
-
-        input[type="text"]:focus,
-        input[type="password"]:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(204, 120, 92, 0.2);
-        }
-
-        .button-group {
+            border-radius: 12px;
+            padding: 40px;
+            min-height: 200px;
             display: flex;
-            gap: 12px;
-        }
-
-        .button {
-            flex-grow: 1;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
+            user-select: none;
         }
-
-        .button-primary {
-            background-color: var(--primary-color);
-            color: var(--button-text-color);
-        }
-
-        .button-primary:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-        
-        .button-secondary {
-            background-color: #f0f0f0;
-            color: #555;
-        }
-
-        .button-secondary:hover {
-            background-color: #e0e0e0;
-        }
-
-        .status-view, .message-box {
-            text-align: center;
-            padding: 20px;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-
-        .message-box.error {
-            background-color: rgba(217, 83, 79, 0.1);
-            color: var(--error-color);
-            border: 1px solid rgba(217, 83, 79, 0.2);
-        }
-        
-        .message-box.success {
-             background-color: rgba(92, 184, 92, 0.1);
-            color: var(--success-color);
-            border: 1px solid rgba(92, 184, 92, 0.2);
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .security-note {
-            font-size: 12px;
-            color: #999;
-            text-align: center;
-            margin-top: 24px;
-        }
+        .word-card .word { font-size: 36px; font-weight: bold; margin-bottom: 16px; }
+        .word-card .answer { font-size: 18px; color: #555; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>飞书授权</h1>
-
-        <!-- 配置视图 -->
+        <!-- 初始配置视图 -->
         <div id="config-view">
+            <h1>飞书授权</h1>
             <div class="form-group">
                 <label for="appId">App ID</label>
                 <input type="text" id="appId" placeholder="请输入你的 App ID">
@@ -169,238 +100,279 @@
             <div class="button-group">
                 <button id="connect-btn" class="button button-primary">保存并连接</button>
             </div>
-             <p class="security-note">
-                🔒 您的凭证将仅保存在浏览器本地，请确保环境安全。
-            </p>
+             <p class="security-note">🔒 您的凭证将仅保存在浏览器本地，请确保环境安全。</p>
         </div>
 
-        <!-- 状态视图 -->
-        <div id="status-view" class="hidden">
-             <div class="message-box success">
-                ✅ 连接成功！
+        <!-- 主应用视图 -->
+        <div id="app-view" class="hidden">
+            <h1>我的单词本</h1>
+            <div id="table-selection-view">
+                <div class="form-group">
+                    <label for="table-select">选择你的单词表</label>
+                    <select id="table-select"></select>
+                </div>
+                <div class="button-group">
+                    <button id="load-records-btn" class="button button-primary">开始学习</button>
+                </div>
             </div>
-            <p>现在应用可以访问您的多维表格了。</p>
-            <div class="button-group">
-                <button id="clear-btn" class="button button-secondary">清除配置并断开连接</button>
+            <div id="word-card-view" class="hidden">
+                <div class="word-card" id="word-card">
+                    <div class="word">Word</div>
+                    <div class="answer hidden">Answer</div>
+                </div>
+                 <div class="button-group">
+                    <button id="prev-word-btn" class="button button-secondary">上一个</button>
+                    <button id="next-word-btn" class="button button-primary">下一个</button>
+                </div>
+            </div>
+             <div class="button-group">
+                <button id="clear-btn" class="button button-secondary">断开连接</button>
             </div>
         </div>
         
-        <!-- 回调/加载视图 -->
-        <div id="loading-view" class="hidden">
-            <div class="message-box">
-                <p>正在处理授权，请稍候...</p>
-            </div>
-        </div>
-        
-        <!-- 错误信息视图 -->
+        <!-- 加载和错误信息视图 -->
+        <div id="loading-view" class="hidden"><div class="message-box"><p>正在处理，请稍候...</p></div></div>
         <div id="error-view" class="message-box error hidden"></div>
-
     </div>
 
     <script>
         // =================================================================
-        // app.js - 所有逻辑都封装在这里
+        // 全功能应用逻辑
         // =================================================================
         
-        const configView = document.getElementById('config-view');
-        const statusView = document.getElementById('status-view');
-        const loadingView = document.getElementById('loading-view');
-        const errorView = document.getElementById('error-view');
+        // 全局状态
+        let currentRecords = [];
+        let currentIndex = 0;
 
-        const appIdInput = document.getElementById('appId');
-        const appSecretInput = document.getElementById('appSecret');
-        const bitableUrlInput = document.getElementById('bitableUrl');
-        const backendUrlInput = document.getElementById('backendUrl'); // 新增后端URL输入框
-        
-        const connectBtn = document.getElementById('connect-btn');
-        const clearBtn = document.getElementById('clear-btn');
+        // 获取所有UI元素
+        const views = {
+            config: document.getElementById('config-view'),
+            app: document.getElementById('app-view'),
+            loading: document.getElementById('loading-view'),
+            error: document.getElementById('error-view'),
+            tableSelection: document.getElementById('table-selection-view'),
+            wordCard: document.getElementById('word-card-view'),
+        };
+        const inputs = {
+            appId: document.getElementById('appId'),
+            appSecret: document.getElementById('appSecret'),
+            bitableUrl: document.getElementById('bitableUrl'),
+            backendUrl: document.getElementById('backendUrl'),
+        };
+        const buttons = {
+            connect: document.getElementById('connect-btn'),
+            clear: document.getElementById('clear-btn'),
+            loadRecords: document.getElementById('load-records-btn'),
+            nextWord: document.getElementById('next-word-btn'),
+            prevWord: document.getElementById('prev-word-btn'),
+        };
+        const UIElements = {
+            tableSelect: document.getElementById('table-select'),
+            wordCardElement: document.getElementById('word-card'),
+            wordText: document.querySelector('.word-card .word'),
+            answerText: document.querySelector('.word-card .answer'),
+        };
 
         const FEISHU_CONFIG_KEY = 'feishu_config';
         const FEISHU_TOKENS_KEY = 'feishu_tokens';
 
-        /**
-         * 页面加载时的入口函数
-         */
+        // --- 应用初始化 ---
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
-
             if (code) {
-                handleCallback(code);
+                handleAuthCallback(code);
             } else {
                 initMainPage();
             }
         };
 
-        /**
-         * 初始化主页视图
-         */
-        function initMainPage() {
+        async function initMainPage() {
             const tokens = loadTokens();
             if (tokens && tokens.accessToken) {
-                showView('status');
+                showView('app');
+                await fetchAndDisplayTables();
             } else {
                 const config = loadConfig();
                 if (config) {
-                    appIdInput.value = config.appId || '';
-                    appSecretInput.value = config.appSecret || '';
-                    bitableUrlInput.value = config.bitableUrl || '';
-                    backendUrlInput.value = config.backendUrl || '';
+                    Object.keys(inputs).forEach(key => {
+                        if(inputs[key]) inputs[key].value = config[key] || '';
+                    });
                 }
                 showView('config');
             }
-            
-            connectBtn.addEventListener('click', handleConnect);
-            clearBtn.addEventListener('click', handleClear);
+            addEventListeners();
+        }
+        
+        function addEventListeners() {
+            buttons.connect.addEventListener('click', handleConnect);
+            buttons.clear.addEventListener('click', handleClear);
+            buttons.loadRecords.addEventListener('click', handleLoadRecords);
+            buttons.nextWord.addEventListener('click', showNextWord);
+            buttons.prevWord.addEventListener('click', showPrevWord);
+            UIElements.wordCardElement.addEventListener('click', toggleAnswer);
         }
 
-        /**
-         * 处理授权回调
-         */
-        async function handleCallback(code) {
+        // --- 授权流程 ---
+        async function handleAuthCallback(code) {
             showView('loading');
             try {
-                const tokens = await exchangeCodeForToken(code);
+                const config = loadConfig();
+                if (!config || !config.backendUrl) throw new Error("后端函数URL配置丢失");
+                
+                // 确保调用正确的callback函数
+                const callbackUrl = config.backendUrl.replace('/proxy', '/callback');
+
+                const response = await fetch(callbackUrl, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, appId: config.appId, appSecret: config.appSecret }),
+                });
+                const tokens = await response.json();
+                if (!response.ok) throw new Error(tokens.error || '授权时发生未知错误');
+
                 saveTokens(tokens);
-                window.location.href = window.location.pathname; // 重定向回主页
+                window.location.href = window.location.pathname;
             } catch (error) {
                 displayError(`授权失败: ${error.message}`);
-                showView('error');
+                showView('config'); // 失败后返回配置页
             }
         }
         
-        /**
-         * 处理连接按钮点击事件
-         */
         async function handleConnect() {
-            const appId = appIdInput.value.trim();
-            const appSecret = appSecretInput.value.trim();
-            const bitableUrl = bitableUrlInput.value.trim();
-            const backendUrl = backendUrlInput.value.trim();
-
-            if (!appId || !appSecret || !bitableUrl || !backendUrl) {
+            const config = {
+                appId: inputs.appId.value.trim(),
+                appSecret: inputs.appSecret.value.trim(),
+                bitableUrl: inputs.bitableUrl.value.trim(),
+                backendUrl: inputs.backendUrl.value.trim(),
+            };
+            if (Object.values(config).some(v => !v)) {
                 displayError("请填写所有字段。");
                 return;
             }
-
             try {
-                const { appToken, tableId } = parseBitableUrl(bitableUrl);
-                const config = { appId, appSecret, bitableUrl, backendUrl, appToken, tableId };
+                const { appToken } = parseBitableUrl(config.bitableUrl);
+                config.appToken = appToken;
                 saveConfig(config);
-                initiateFeishuAuth(appId);
+                const redirectUri = window.location.href.split('?')[0];
+                const authUrl = `https://open.feishu.cn/open-apis/authen/v1/index?app_id=${config.appId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+                window.location.href = authUrl;
             } catch (error) {
                 displayError(error.message);
             }
         }
         
-        /**
-         * 处理清除配置按钮点击事件
-         */
         function handleClear() {
             localStorage.removeItem(FEISHU_CONFIG_KEY);
             localStorage.removeItem(FEISHU_TOKENS_KEY);
-            appIdInput.value = '';
-            appSecretInput.value = '';
-            bitableUrlInput.value = '';
-            backendUrlInput.value = '';
             window.location.reload();
         }
 
-        /**
-         * 解析多维表格URL
-         */
-        function parseBitableUrl(url) {
-            const match = url.match(/feishu\.cn\/base\/([^?]+)\?table=([^&]+)/);
-            if (match && match[1] && match[2]) {
-                return { appToken: match[1], tableId: match[2] };
-            }
-            throw new Error('无效的飞书多维表格链接格式。');
-        }
-
-        /**
-         * 重定向到飞书授权页面
-         */
-        function initiateFeishuAuth(appId) {
-            // 回调地址是当前页面的地址
-            const redirectUri = window.location.href.split('?')[0];
-            const authUrl = `https://open.feishu.cn/open-apis/authen/v1/index?app_id=${appId}&redirect_uri=${encodeURIComponent(redirectUri)}`;
-            window.location.href = authUrl;
-        }
-
-        /**
-         * 用授权码换取access_token
-         */
-        async function exchangeCodeForToken(code) {
+        // --- API 调用 ---
+        async function feishuApiProxy(feishuApi, method = 'GET', body = null) {
             const config = loadConfig();
-            if (!config || !config.backendUrl) {
-                throw new Error("后端函数URL配置丢失，请重新填写。");
-            }
+            const tokens = loadTokens();
+            if (!config || !tokens) throw new Error("配置或令牌丢失");
 
-            // **[MODIFIED]** 不再使用不靠谱的代理，而是请求我们自己的后端函数
-            const response = await fetch(config.backendUrl, {
+            const proxyUrl = config.backendUrl.replace('/callback', '/proxy');
+
+            const response = await fetch(proxyUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${tokens.accessToken}`,
                 },
-                body: JSON.stringify({
-                    code: code,
-                    appId: config.appId,
-                    appSecret: config.appSecret,
-                }),
+                body: JSON.stringify({ feishuApi, method, body }),
             });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'API代理请求失败');
+            return data;
+        }
 
-            const result = await response.json();
-
-            if (!response.ok) {
-                throw new Error(result.error || `请求失败，状态码: ${response.status}`);
+        async function fetchAndDisplayTables() {
+            showView('loading');
+            try {
+                const config = loadConfig();
+                const data = await feishuApiProxy(`/bitable/v1/apps/${config.appToken}/tables`);
+                UIElements.tableSelect.innerHTML = data.items.map(table => `<option value="${table.table_id}">${table.name}</option>`).join('');
+                showView('app');
+            } catch (error) {
+                displayError(`获取数据表失败: ${error.message}`);
+                showView('app'); // 即使失败也回到主应用界面
+                views.tableSelection.classList.remove('hidden');
             }
-            
-            return result;
-        }
-
-        // --- 本地存储辅助函数 ---
-        function saveConfig(config) {
-            localStorage.setItem(FEISHU_CONFIG_KEY, JSON.stringify(config));
-        }
-
-        function loadConfig() {
-            const configStr = localStorage.getItem(FEISHU_CONFIG_KEY);
-            return configStr ? JSON.parse(configStr) : null;
         }
         
-        function saveTokens(tokens) {
-            localStorage.setItem(FEISHU_TOKENS_KEY, JSON.stringify(tokens));
+        async function handleLoadRecords() {
+            showView('loading');
+            try {
+                const config = loadConfig();
+                const tableId = UIElements.tableSelect.value;
+                const data = await feishuApiProxy(`/bitable/v1/apps/${config.appToken}/tables/${tableId}/records?page_size=100`);
+                currentRecords = data.items;
+                currentIndex = 0;
+                if(currentRecords && currentRecords.length > 0) {
+                    displayWord(currentIndex);
+                    views.tableSelection.classList.add('hidden');
+                    views.wordCard.classList.remove('hidden');
+                } else {
+                    displayError("这个数据表是空的！");
+                }
+                showView('app');
+            } catch (error) {
+                displayError(`加载单词失败: ${error.message}`);
+                showView('app');
+            }
         }
 
-        function loadTokens() {
-            const tokensStr = localStorage.getItem(FEISHU_TOKENS_KEY);
-            return tokensStr ? JSON.parse(tokensStr) : null;
+        // --- 背单词逻辑 ---
+        function displayWord(index) {
+            const record = currentRecords[index];
+            if (!record) return;
+            // 假设第一列是单词，第二列是释义
+            const fields = Object.values(record.fields);
+            UIElements.wordText.textContent = fields[0] ? (fields[0][0]?.text || fields[0]) : '（无单词）';
+            UIElements.answerText.textContent = fields[1] ? (fields[1][0]?.text || fields[1]) : '（无释义）';
+            UIElements.answerText.classList.add('hidden');
+        }
+
+        function showNextWord() {
+            if (currentIndex < currentRecords.length - 1) {
+                currentIndex++;
+                displayWord(currentIndex);
+            }
+        }
+
+        function showPrevWord() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                displayWord(currentIndex);
+            }
         }
         
-        // --- UI辅助函数 ---
+        function toggleAnswer() {
+            UIElements.answerText.classList.toggle('hidden');
+        }
+        
+        // --- 辅助函数 ---
+        function parseBitableUrl(url) {
+            const match = url.match(/feishu\.cn\/base\/([^?]+)/);
+            if (match && match[1]) return { appToken: match[1] };
+            throw new Error('无效的飞书多维表格链接格式。');
+        }
+        function loadConfig() { return JSON.parse(localStorage.getItem(FEISHU_CONFIG_KEY)); }
+        function saveConfig(config) { localStorage.setItem(FEISHU_CONFIG_KEY, JSON.stringify(config)); }
+        function loadTokens() { return JSON.parse(localStorage.getItem(FEISHU_TOKENS_KEY)); }
+        function saveTokens(tokens) { localStorage.setItem(FEISHU_TOKENS_KEY, JSON.stringify(tokens)); }
         function showView(viewName) {
-            configView.classList.add('hidden');
-            statusView.classList.add('hidden');
-            loadingView.classList.add('hidden');
-            errorView.classList.add('hidden');
-
-            if (viewName === 'config') {
-                configView.classList.remove('hidden');
-            } else if (viewName === 'status') {
-                statusView.classList.remove('hidden');
-            } else if (viewName === 'loading') {
-                loadingView.classList.remove('hidden');
-            }
+            Object.values(views).forEach(v => v.classList.add('hidden'));
+            if(views[viewName]) views[viewName].classList.remove('hidden');
         }
-        
         function displayError(message) {
-            errorView.textContent = message;
-            errorView.classList.remove('hidden');
-            setTimeout(() => {
-                 errorView.classList.add('hidden');
-            }, 5000);
+            views.error.textContent = message;
+            views.error.classList.remove('hidden');
+            setTimeout(() => views.error.classList.add('hidden'), 5000);
         }
-
     </script>
 </body>
 </html>

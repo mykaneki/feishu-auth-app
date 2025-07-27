@@ -191,6 +191,8 @@
             const tokens = loadTokens();
             if (tokens && tokens.accessToken) {
                 showView('app');
+                views.tableSelection.classList.remove('hidden');
+                views.wordCard.classList.add('hidden');
                 await fetchAndDisplayTables();
             } else {
                 const config = loadConfig();
@@ -220,7 +222,6 @@
                 const config = loadConfig();
                 if (!config || !config.backendUrl) throw new Error("后端函数URL配置丢失");
                 
-                // 确保调用正确的callback函数
                 const callbackUrl = config.backendUrl.replace('/proxy', '/callback');
 
                 const response = await fetch(callbackUrl, { 
@@ -235,7 +236,7 @@
                 window.location.href = window.location.pathname;
             } catch (error) {
                 displayError(`授权失败: ${error.message}`);
-                showView('config'); // 失败后返回配置页
+                showView('config');
             }
         }
         
@@ -294,12 +295,15 @@
             try {
                 const config = loadConfig();
                 const data = await feishuApiProxy(`/bitable/v1/apps/${config.appToken}/tables`);
-                UIElements.tableSelect.innerHTML = data.items.map(table => `<option value="${table.table_id}">${table.name}</option>`).join('');
+                if (data.items && data.items.length > 0) {
+                    UIElements.tableSelect.innerHTML = data.items.map(table => `<option value="${table.table_id}">${table.name}</option>`).join('');
+                } else {
+                    UIElements.tableSelect.innerHTML = `<option>未找到任何数据表</option>`;
+                }
                 showView('app');
             } catch (error) {
                 displayError(`获取数据表失败: ${error.message}`);
-                showView('app'); // 即使失败也回到主应用界面
-                views.tableSelection.classList.remove('hidden');
+                showView('app');
             }
         }
         
@@ -329,7 +333,6 @@
         function displayWord(index) {
             const record = currentRecords[index];
             if (!record) return;
-            // 假设第一列是单词，第二列是释义
             const fields = Object.values(record.fields);
             UIElements.wordText.textContent = fields[0] ? (fields[0][0]?.text || fields[0]) : '（无单词）';
             UIElements.answerText.textContent = fields[1] ? (fields[1][0]?.text || fields[1]) : '（无释义）';

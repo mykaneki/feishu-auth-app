@@ -21,7 +21,7 @@
             color: var(--text-color);
             display: flex;
             justify-content: center;
-            align-items: flex-start; /* 改为 flex-start 以容纳更多内容 */
+            align-items: flex-start;
             min-height: 100vh;
             margin: 0;
             padding: 20px;
@@ -56,7 +56,6 @@
         .hidden { display: none; }
         .security-note { font-size: 12px; color: #999; text-align: center; margin-top: 24px; }
         
-        /* 新增卡片样式 */
         .word-card {
             background-color: #fff;
             border: 1px solid var(--border-color);
@@ -137,19 +136,20 @@
 
     <script>
         // =================================================================
-        // 全功能应用逻辑
+        // 全功能应用逻辑 (UI修复版)
         // =================================================================
         
-        // 全局状态
         let currentRecords = [];
         let currentIndex = 0;
 
-        // 获取所有UI元素
-        const views = {
+        // **[FIXED]** 将主视图和子视图分开管理
+        const mainViews = {
             config: document.getElementById('config-view'),
             app: document.getElementById('app-view'),
             loading: document.getElementById('loading-view'),
             error: document.getElementById('error-view'),
+        };
+        const subViews = {
             tableSelection: document.getElementById('table-selection-view'),
             wordCard: document.getElementById('word-card-view'),
         };
@@ -191,8 +191,8 @@
             const tokens = loadTokens();
             if (tokens && tokens.accessToken) {
                 showView('app');
-                views.tableSelection.classList.remove('hidden');
-                views.wordCard.classList.add('hidden');
+                subViews.tableSelection.classList.remove('hidden');
+                subViews.wordCard.classList.add('hidden');
                 await fetchAndDisplayTables();
             } else {
                 const config = loadConfig();
@@ -301,6 +301,8 @@
                     UIElements.tableSelect.innerHTML = `<option>未找到任何数据表</option>`;
                 }
                 showView('app');
+                subViews.tableSelection.classList.remove('hidden');
+                subViews.wordCard.classList.add('hidden');
             } catch (error) {
                 displayError(`获取数据表失败: ${error.message}`);
                 showView('app');
@@ -317,10 +319,12 @@
                 currentIndex = 0;
                 if(currentRecords && currentRecords.length > 0) {
                     displayWord(currentIndex);
-                    views.tableSelection.classList.add('hidden');
-                    views.wordCard.classList.remove('hidden');
+                    subViews.tableSelection.classList.add('hidden');
+                    subViews.wordCard.classList.remove('hidden');
                 } else {
                     displayError("这个数据表是空的！");
+                    subViews.tableSelection.classList.remove('hidden');
+                    subViews.wordCard.classList.add('hidden');
                 }
                 showView('app');
             } catch (error) {
@@ -368,13 +372,13 @@
         function loadTokens() { return JSON.parse(localStorage.getItem(FEISHU_TOKENS_KEY)); }
         function saveTokens(tokens) { localStorage.setItem(FEISHU_TOKENS_KEY, JSON.stringify(tokens)); }
         function showView(viewName) {
-            Object.values(views).forEach(v => v.classList.add('hidden'));
-            if(views[viewName]) views[viewName].classList.remove('hidden');
+            Object.values(mainViews).forEach(v => v.classList.add('hidden'));
+            if(mainViews[viewName]) mainViews[viewName].classList.remove('hidden');
         }
         function displayError(message) {
-            views.error.textContent = message;
-            views.error.classList.remove('hidden');
-            setTimeout(() => views.error.classList.add('hidden'), 5000);
+            mainViews.error.textContent = message;
+            mainViews.error.classList.remove('hidden');
+            setTimeout(() => mainViews.error.classList.add('hidden'), 5000);
         }
     </script>
 </body>

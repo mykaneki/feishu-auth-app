@@ -60,18 +60,22 @@
             background-color: #fff;
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 40px;
-            min-height: 200px;
+            padding: 24px;
+            min-height: 300px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
+            align-items: flex-start; /* 左对齐 */
+            text-align: left;
             cursor: pointer;
             user-select: none;
         }
-        .word-card .word { font-size: 36px; font-weight: bold; margin-bottom: 16px; }
-        .word-card .answer { font-size: 18px; color: #555; }
+        .word-card .word-main { text-align: center; width: 100%; margin-bottom: 20px; }
+        .word-card .word { font-size: 36px; font-weight: bold; margin-bottom: 8px; }
+        .word-card .phonetic { font-size: 18px; color: #777; }
+        .word-card .details { width: 100%; }
+        .word-card .detail-item { margin-bottom: 12px; }
+        .word-card .detail-label { font-weight: bold; color: var(--primary-color); font-size: 14px; }
+        .word-card .detail-content { font-size: 16px; color: #333; line-height: 1.6; }
     </style>
 </head>
 <body>
@@ -116,8 +120,24 @@
             </div>
             <div id="word-card-view" class="hidden">
                 <div class="word-card" id="word-card">
-                    <div class="word">Word</div>
-                    <div class="answer hidden">Answer</div>
+                    <div class="word-main">
+                        <div class="word">Word</div>
+                        <div class="phonetic">/fəˈnetɪk/</div>
+                    </div>
+                    <div class="details">
+                        <div class="detail-item answer">
+                            <div class="detail-label">释义</div>
+                            <div class="detail-content" id="definition-content">Definition</div>
+                        </div>
+                        <div class="detail-item answer hidden">
+                            <div class="detail-label">固定搭配</div>
+                            <div class="detail-content" id="collocation-content">Collocation</div>
+                        </div>
+                        <div class="detail-item answer hidden">
+                            <div class="detail-label">例句</div>
+                            <div class="detail-content" id="example-content">Example Sentence</div>
+                        </div>
+                    </div>
                 </div>
                  <div class="button-group">
                     <button id="prev-word-btn" class="button button-secondary">上一个</button>
@@ -136,13 +156,12 @@
 
     <script>
         // =================================================================
-        // 全功能应用逻辑 (UI修复版)
+        // 全功能应用逻辑 (全字段支持版)
         // =================================================================
         
         let currentRecords = [];
         let currentIndex = 0;
 
-        // **[FIXED]** 将主视图和子视图分开管理
         const mainViews = {
             config: document.getElementById('config-view'),
             app: document.getElementById('app-view'),
@@ -170,7 +189,11 @@
             tableSelect: document.getElementById('table-select'),
             wordCardElement: document.getElementById('word-card'),
             wordText: document.querySelector('.word-card .word'),
-            answerText: document.querySelector('.word-card .answer'),
+            phoneticText: document.querySelector('.word-card .phonetic'),
+            definitionContent: document.getElementById('definition-content'),
+            collocationContent: document.getElementById('collocation-content'),
+            exampleContent: document.getElementById('example-content'),
+            answerElements: document.querySelectorAll('.answer'),
         };
 
         const FEISHU_CONFIG_KEY = 'feishu_config';
@@ -336,11 +359,39 @@
         // --- 背单词逻辑 ---
         function displayWord(index) {
             const record = currentRecords[index];
-            if (!record) return;
-            const fields = Object.values(record.fields);
-            UIElements.wordText.textContent = fields[0] ? (fields[0][0]?.text || fields[0]) : '（无单词）';
-            UIElements.answerText.textContent = fields[1] ? (fields[1][0]?.text || fields[1]) : '（无释义）';
-            UIElements.answerText.classList.add('hidden');
+            if (!record || !record.fields) return;
+
+            // **[FIXED]** 通过您提供的字段名来获取数据
+            const FIELD_NAMES = {
+                WORD: '单词',
+                DEFINITION: '词性和释义',
+                PHONETIC: '音标',
+                COLLOCATION: '固定搭配',
+                EXAMPLE: '例句',
+            };
+
+            const getFieldText = (field) => {
+                if (!field) return '';
+                if (Array.isArray(field) && field[0] && typeof field[0].text !== 'undefined') {
+                    return field[0].text;
+                }
+                return field;
+            };
+            
+            UIElements.wordText.textContent = getFieldText(record.fields[FIELD_NAMES.WORD]) || '（未找到"单词"列）';
+            UIElements.phoneticText.textContent = getFieldText(record.fields[FIELD_NAMES.PHONETIC]) || '';
+            UIElements.definitionContent.textContent = getFieldText(record.fields[FIELD_NAMES.DEFINITION]) || '（点击卡片显示更多信息）';
+            UIElements.collocationContent.textContent = getFieldText(record.fields[FIELD_NAMES.COLLOCATION]) || '无';
+            UIElements.exampleContent.textContent = getFieldText(record.fields[FIELD_NAMES.EXAMPLE]) || '无';
+            
+            // 重置答案的显示状态
+            UIElements.answerElements.forEach((el, idx) => {
+                if(idx === 0) { // 默认只显示释义
+                    el.classList.remove('hidden');
+                } else {
+                    el.classList.add('hidden');
+                }
+            });
         }
 
         function showNextWord() {
@@ -358,7 +409,12 @@
         }
         
         function toggleAnswer() {
-            UIElements.answerText.classList.toggle('hidden');
+            // 点击卡片时，切换所有隐藏答案的显示状态
+            UIElements.answerElements.forEach((el, idx) => {
+                if (idx > 0) { // 不切换第一个（释义）
+                    el.classList.toggle('hidden');
+                }
+            });
         }
         
         // --- 辅助函数 ---
